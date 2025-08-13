@@ -1,6 +1,8 @@
+from tensorflow import keras
 import tensorflow as tf
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from typing import Optional
 import os
 
 def filter_images(DATASET_PATH: str, *namefolders: str, extension: str = ".JFIF") -> int:
@@ -47,7 +49,7 @@ def filter_images(DATASET_PATH: str, *namefolders: str, extension: str = ".JFIF"
 
     return deleted_images
 
-def images_size(DATASET_PATH: str, *namefolders: str) -> None:
+def show_images_size(DATASET_PATH: str, *namefolders: str) -> None:
     """
     Displays up to 9 images from each specified folder and shows their dimensions.
 
@@ -72,4 +74,51 @@ def images_size(DATASET_PATH: str, *namefolders: str) -> None:
             plt.axis("off")
 
         plt.suptitle(f"Folder: {folder_name}")
+        plt.show()
+
+def show_images_standar_size(
+        DATASET_PATH: str, 
+        image_size: tuple[int, int] = (100, 100), 
+        batch_size: int = 10, 
+        validation_split: float = 0.2, 
+        subset_name: str ="test",
+        seed: Optional[int] = None,
+        dataset_selected: int = 0
+        ) -> None:
+    
+    """
+    Loads images from the specified dataset directory and displays a 3x3 grid of sample images with their labels.
+
+    Args:
+        DATASET_PATH (str): Path to the base directory containing image subfolders.
+        image_size (tuple[int, int], optional): Target size (height, width) to resize images. Defaults to (100, 100).
+        batch_size (int, optional): Number of images per batch. Defaults to 10.
+        validation_split (float, optional): Fraction of data to reserve for validation. Defaults to 0.2.
+        subset_name (str, optional): Dataset subset to load, e.g., "training" or "validation". Defaults to "test".
+        seed (Optional[int], optional): Random seed for shuffling and transformations. Defaults to None.
+        dataset_selected (int): Number of dataset selected to view.
+
+    Returns:
+        None
+
+    """
+
+    train_ds = keras.utils.image_dataset_from_directory(
+        DATASET_PATH,
+        validation_split = validation_split,
+        subset = subset_name,
+        seed = seed,
+        image_size = image_size,
+        batch_size = batch_size,
+    )
+
+    plt.figure(figsize=(10, 10))
+
+    for img, etiqueta in train_ds.take(dataset_selected):
+        for i in range(9):
+            ax = plt.subplot(3, 3, i + 1)
+            plt.imshow(img[i].numpy().astype("uint8"))
+            plt.title(f"Etiqueta: {etiqueta[i]}")
+            plt.axis("off")
+
         plt.show()
